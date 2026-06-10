@@ -59,7 +59,10 @@ function encryptSecret(plain) {
   try {
     const iv = crypto.randomBytes(12);
     const cipher = crypto.createCipheriv("aes-256-gcm", ENC_KEY, iv);
-    const ct = Buffer.concat([cipher.update(String(plain), "utf8"), cipher.final()]);
+    const ct = Buffer.concat([
+      cipher.update(String(plain), "utf8"),
+      cipher.final(),
+    ]);
     const tag = cipher.getAuthTag();
     return Buffer.concat([iv, tag, ct]).toString("base64");
   } catch (err) {
@@ -77,7 +80,10 @@ function decryptSecret(stored) {
     const ct = buf.slice(28);
     const decipher = crypto.createDecipheriv("aes-256-gcm", ENC_KEY, iv);
     decipher.setAuthTag(tag);
-    const plain = Buffer.concat([decipher.update(ct), decipher.final()]).toString("utf8");
+    const plain = Buffer.concat([
+      decipher.update(ct),
+      decipher.final(),
+    ]).toString("utf8");
     return plain;
   } catch (err) {
     // If decryption fails, assume the stored value was plaintext
@@ -102,7 +108,12 @@ const saveData = async (data) => {
 const data = await loadData();
 
 const normalizeUser = (user) => {
-  const { password: _password, githubToken: _gt, openaiKey: _ok, ...safeUser } = user;
+  const {
+    password: _password,
+    githubToken: _gt,
+    openaiKey: _ok,
+    ...safeUser
+  } = user;
   void _password;
   void _gt;
   void _ok;
@@ -137,11 +148,13 @@ const authMiddleware = (req, res, next) => {
   // If no Authorization header, try cookie 'rm_token'
   let finalToken = token;
   if (!finalToken && req.headers.cookie) {
-    const cookies = Object.fromEntries(req.headers.cookie.split(/;\s*/).map(c => {
-      const idx = c.indexOf('=');
-      return [c.slice(0, idx), decodeURIComponent(c.slice(idx+1))];
-    }));
-    finalToken = cookies['rm_token'];
+    const cookies = Object.fromEntries(
+      req.headers.cookie.split(/;\s*/).map((c) => {
+        const idx = c.indexOf("=");
+        return [c.slice(0, idx), decodeURIComponent(c.slice(idx + 1))];
+      }),
+    );
+    finalToken = cookies["rm_token"];
   }
 
   if (!finalToken) {
@@ -281,7 +294,9 @@ app.put("/settings", authMiddleware, async (req, res) => {
 app.post("/jobs", authMiddleware, async (req, res) => {
   const { repoUrl, instruction } = req.body;
   if (!repoUrl || !instruction) {
-    return res.status(400).json({ message: "repoUrl and instruction are required" });
+    return res
+      .status(400)
+      .json({ message: "repoUrl and instruction are required" });
   }
 
   const job = {
@@ -331,17 +346,22 @@ app.put("/admin/users/:id", authMiddleware, requireAdmin, async (req, res) => {
   return res.json(normalizeUser(user));
 });
 
-app.delete("/admin/users/:id", authMiddleware, requireAdmin, async (req, res) => {
-  const idx = data.users.findIndex((u) => u.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ message: "User not found" });
-  const [removed] = data.users.splice(idx, 1);
-  // remove sessions
-  for (const t of Object.keys(data.sessions)) {
-    if (data.sessions[t].userId === removed.id) delete data.sessions[t];
-  }
-  await saveData(data);
-  return res.status(204).end();
-});
+app.delete(
+  "/admin/users/:id",
+  authMiddleware,
+  requireAdmin,
+  async (req, res) => {
+    const idx = data.users.findIndex((u) => u.id === req.params.id);
+    if (idx === -1) return res.status(404).json({ message: "User not found" });
+    const [removed] = data.users.splice(idx, 1);
+    // remove sessions
+    for (const t of Object.keys(data.sessions)) {
+      if (data.sessions[t].userId === removed.id) delete data.sessions[t];
+    }
+    await saveData(data);
+    return res.status(204).end();
+  },
+);
 
 app.get("/auth/github", (req, res) => {
   if (!githubClientId || !githubClientSecret) {
@@ -496,20 +516,24 @@ app.get("/health", (_req, res) => {
 app.post("/auth/logout", (req, res) => {
   // find token from cookie or header
   const authHeader = req.headers.authorization || "";
-  let token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : undefined;
+  let token = authHeader.startsWith("Bearer ")
+    ? authHeader.slice(7)
+    : undefined;
   if (!token && req.headers.cookie) {
-    const cookies = Object.fromEntries(req.headers.cookie.split(/;\s*/).map(c => {
-      const idx = c.indexOf('=');
-      return [c.slice(0, idx), decodeURIComponent(c.slice(idx+1))];
-    }));
-    token = cookies['rm_token'];
+    const cookies = Object.fromEntries(
+      req.headers.cookie.split(/;\s*/).map((c) => {
+        const idx = c.indexOf("=");
+        return [c.slice(0, idx), decodeURIComponent(c.slice(idx + 1))];
+      }),
+    );
+    token = cookies["rm_token"];
   }
   if (token && data.sessions[token]) delete data.sessions[token];
   // clear cookie
   if (res.clearCookie) {
-    res.clearCookie('rm_token', { path: '/' });
+    res.clearCookie("rm_token", { path: "/" });
   } else {
-    res.setHeader('Set-Cookie', 'rm_token=; Max-Age=0; Path=/; HttpOnly');
+    res.setHeader("Set-Cookie", "rm_token=; Max-Age=0; Path=/; HttpOnly");
   }
   saveData(data).catch(() => {});
   return res.status(204).end();

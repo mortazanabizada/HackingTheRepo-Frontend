@@ -35,7 +35,7 @@
 
 ## Architecture Overview
 
-```
+````
 src/
 ├── context/
 │   ├── AuthContext       ← Global user session + JWT token
@@ -63,16 +63,18 @@ openssl rand -base64 32
 
 # or hex
 openssl rand -hex 32
-```
+````
 
 Start the backend with the key:
 
 ```bash
 REPOMIND_ENCRYPTION_KEY=<base64-or-hex-key> GITHUB_CLIENT_ID=... GITHUB_CLIENT_SECRET=... npm run dev:api
 ```
+
     ├── Layout            ← Sidebar nav + main content wrapper
     ├── StatusBadge       ← Coloured pill for job status
     └── ThemeToggle       ← Dark/light switch button
+
 ```
 
 ---
@@ -80,33 +82,35 @@ REPOMIND_ENCRYPTION_KEY=<base64-or-hex-key> GITHUB_CLIENT_ID=... GITHUB_CLIENT_S
 ## Project Structure
 
 ```
+
 frontend/
 ├── src/
-│   ├── components/
-│   │   ├── Layout.jsx / Layout.css
-│   │   ├── StatusBadge.jsx
-│   │   └── ThemeToggle.jsx
-│   ├── context/
-│   │   ├── AuthContext.jsx
-│   │   └── ThemeContext.jsx
-│   ├── pages/
-│   │   ├── LandingPage.jsx / .css
-│   │   ├── AuthPages.jsx / .css
-│   │   ├── LoginPage.jsx
-│   │   ├── SignupPage.jsx
-│   │   ├── DashboardPage.jsx / .css
-│   │   ├── NewJobPage.jsx / .css
-│   │   ├── JobDetailPage.jsx / .css
-│   │   └── SettingsPage.jsx / .css
-│   ├── utils/
-│   │   └── api.js          # Thin fetch wrapper — sets Authorization header
-│   ├── App.jsx             # Router + context providers
-│   ├── main.jsx            # React DOM entry point
-│   └── index.css           # Global CSS variables & reset
+│ ├── components/
+│ │ ├── Layout.jsx / Layout.css
+│ │ ├── StatusBadge.jsx
+│ │ └── ThemeToggle.jsx
+│ ├── context/
+│ │ ├── AuthContext.jsx
+│ │ └── ThemeContext.jsx
+│ ├── pages/
+│ │ ├── LandingPage.jsx / .css
+│ │ ├── AuthPages.jsx / .css
+│ │ ├── LoginPage.jsx
+│ │ ├── SignupPage.jsx
+│ │ ├── DashboardPage.jsx / .css
+│ │ ├── NewJobPage.jsx / .css
+│ │ ├── JobDetailPage.jsx / .css
+│ │ └── SettingsPage.jsx / .css
+│ ├── utils/
+│ │ └── api.js # Thin fetch wrapper — sets Authorization header
+│ ├── App.jsx # Router + context providers
+│ ├── main.jsx # React DOM entry point
+│ └── index.css # Global CSS variables & reset
 ├── index.html
 ├── vite.config.js
 └── .gitignore
-```
+
+````
 
 ---
 
@@ -123,7 +127,7 @@ frontend/
 cd frontend
 npm install
 npm run dev        # Vite dev server on http://localhost:5173
-```
+````
 
 ### Build for Production
 

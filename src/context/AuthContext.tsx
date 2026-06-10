@@ -6,7 +6,12 @@ import {
   type ReactNode,
 } from "react";
 import api from "../utils/api";
-import type { ApiErrorResponse, AuthResponse, AuthUser, LocalUser } from "../types";
+import type {
+  ApiErrorResponse,
+  AuthResponse,
+  AuthUser,
+  LocalUser,
+} from "../types";
 
 interface GithubOAuthSettings {
   githubUsername: string;
@@ -17,7 +22,11 @@ interface AuthContextValue {
   user: AuthUser | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<AuthResponse>;
-  signup: (username: string, email: string, password: string) => Promise<AuthResponse>;
+  signup: (
+    username: string,
+    email: string,
+    password: string,
+  ) => Promise<AuthResponse>;
   loginWithGithub: () => void;
   completeGithubLogin: (search: string) => Promise<AuthResponse>;
   logout: () => void;
@@ -77,7 +86,7 @@ function decodeJsonParam<T>(value: string | null): T | null {
 }
 
 function stripSensitive(
-  user: (AuthUser & { password?: string }) | null | undefined
+  user: (AuthUser & { password?: string }) | null | undefined,
 ): AuthUser | null {
   if (!user) return null;
   const safeUser = { ...user };
@@ -132,7 +141,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       .finally(() => setLoading(false));
   }, []);
 
-  const login = async (email: string, password: string): Promise<AuthResponse> => {
+  const login = async (
+    email: string,
+    password: string,
+  ): Promise<AuthResponse> => {
     try {
       const { data } = await api.post("/auth/login", { email, password });
       const nextUser = stripSensitive(data.user as LocalUser | AuthUser);
@@ -149,11 +161,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const match = localUsers.find(
         (account) =>
           account.email.toLowerCase() === email.toLowerCase() &&
-          account.password === password
+          account.password === password,
       );
 
       if (!match) {
-        throw new Error("Use demo@repomind.dev / demo1234, or create a local account on the signup screen.");
+        throw new Error(
+          "Use demo@repomind.dev / demo1234, or create a local account on the signup screen.",
+        );
       }
 
       const nextUser = stripSensitive(match);
@@ -168,10 +182,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signup = async (
     username: string,
     email: string,
-    password: string
+    password: string,
   ): Promise<AuthResponse> => {
     try {
-      const { data } = await api.post("/auth/signup", { username, email, password });
+      const { data } = await api.post("/auth/signup", {
+        username,
+        email,
+        password,
+      });
       const nextUser = stripSensitive(data.user as LocalUser | AuthUser);
       // Server sets cookie for new session; persist user
       if (nextUser) {
@@ -183,7 +201,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (!shouldUseLocalFallback(error)) throw error;
 
       const localUsers = ensureLocalUsers();
-      const emailTaken = localUsers.some((account) => account.email.toLowerCase() === email.toLowerCase());
+      const emailTaken = localUsers.some(
+        (account) => account.email.toLowerCase() === email.toLowerCase(),
+      );
       if (emailTaken) {
         throw new Error("An account with that email already exists locally.");
       }
@@ -207,7 +227,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const persistGithubSettings = async (
     githubUsername?: string,
-    githubToken?: string
+    githubToken?: string,
   ): Promise<void> => {
     if (!githubUsername && !githubToken) return;
 
